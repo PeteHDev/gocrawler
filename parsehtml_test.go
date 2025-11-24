@@ -43,3 +43,50 @@ func TestGetH1FromHTML(t *testing.T) {
 
 	}
 }
+
+func TestGetParagraphFromHTML(t *testing.T) {
+	tests := []struct {
+		name      string
+		inputHTML string
+		expected  string
+	}{
+		{
+			name:      "only p",
+			inputHTML: "<p>A paragpraph</p>",
+			expected:  "A paragpraph",
+		},
+		{
+			name:      "basic HTML",
+			inputHTML: "<html><body><p>Test Paragraph</></body></html>",
+			expected:  "Test Paragraph",
+		},
+		{
+			name:      "multiple paragraphs",
+			inputHTML: "<html><body><p>Paragraph 1</p><p>Paragraph 2</p><p>Paragraph 3<p></body></html>",
+			expected:  "Paragraph 1",
+		},
+		{
+			name:      "no paragraph",
+			inputHTML: "<html><body><h2>Test Title</h2></body></html>",
+			expected:  "",
+		},
+		{
+			name:      "paragraph in main priority",
+			inputHTML: "<html><body><p>Wrong Paragraph</p><main><p>Correct Paragraph</p></main></body></html>",
+			expected:  "Correct Paragraph",
+		},
+	}
+
+	for i, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := getParagraphFromHTML(tc.inputHTML)
+			if err != nil {
+				t.Errorf("Test %v - '%s' FAIL: unexpected error: %v", i, tc.name, err)
+			}
+			if actual != tc.expected {
+				t.Errorf("Test %v - '%s' FAIL: expected: %v, actual: %v", i, tc.name, tc.expected, actual)
+			}
+		})
+
+	}
+}
