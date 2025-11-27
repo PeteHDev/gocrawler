@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -17,7 +18,14 @@ func getURLsFromHTML(htmlBody string, baseURL *url.URL) ([]string, error) {
 	urls := make([]string, 0, refs.Length())
 	refs.Each(func(_ int, s *goquery.Selection) {
 		href, _ := s.Attr("href")
-		urls = append(urls, href)
+		hrefURL, err := url.Parse(href)
+		if err != nil {
+			fmt.Printf("error: failed to parse url <%v>\n", href)
+			return
+		}
+		if hrefURL.Host == baseURL.Host {
+			urls = append(urls, href)
+		}
 	})
 
 	return urls, nil

@@ -14,6 +14,9 @@ func main() {
 			<a href="https://wikipedia.org"><span>Boot.dev</span></a>
 			<a href="https://google.com"><span>Boot.dev</span></a>
 			<a href="https://youtube.com"><span>Boot.dev</span></a>
+			<a href="https://blog.boot.dev/haha"><span>Boot.dev</span></a>
+			<a href="https://blog.boot.dev/xoxo"><span>Boot.dev</span></a>
+			<a href="https://blog.boot.dev/heehee"><span>Boot.dev</span></a>
 		</body>
 	</html>`
 	baseURL, err := url.Parse(inputURL)
