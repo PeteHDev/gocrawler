@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/url"
+	"strings"
 )
 
 func normalizeURL(urlstr string) (string, error) {
@@ -10,11 +11,6 @@ func normalizeURL(urlstr string) (string, error) {
 		return "", err
 	}
 
-	var noTrailPath string
-	if structURL.Path[len(structURL.Path)-1] == '/' {
-		noTrailPath = structURL.Path[:len(structURL.Path)-1]
-	} else {
-		noTrailPath = structURL.Path
-	}
+	noTrailPath := strings.TrimSuffix(structURL.Path, "/")
 	return structURL.Host + noTrailPath, nil
 }
