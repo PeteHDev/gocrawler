@@ -202,7 +202,7 @@ func TestGetImagesFromHTMLRelative(t *testing.T) {
 
 	expected := []string{
 		"https://blog.boot.dev/logo1.png",
-		"https://blog.boot.dev/logo2.png",
+		"https://blog.boot.dev/logo2.png/",
 		"https://blog.boot.dev/logo3.png/",
 		"https://blog.boot.dev/logo4.png",
 	}

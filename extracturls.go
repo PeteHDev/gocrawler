@@ -42,7 +42,7 @@ func getImagesFromHTML(htmlBody string, baseURL *url.URL) ([]string, error) {
 	}
 
 	baseURLString := strings.TrimSuffix(baseURL.String(), "/")
-	srcs := doc.Find("a[href]")
+	srcs := doc.Find("img[src]")
 	images := make([]string, 0, srcs.Length())
 	srcs.Each(func(_ int, s *goquery.Selection) {
 		src, _ := s.Attr("src")
