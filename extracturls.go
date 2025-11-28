@@ -14,22 +14,22 @@ func getURLsFromHTML(htmlBody string, baseURL *url.URL) ([]string, error) {
 		return nil, err
 	}
 
-	baseURLString := strings.TrimSuffix(baseURL.String(), "/")
 	refs := doc.Find("a[href]")
 	urls := make([]string, 0, refs.Length())
 	refs.Each(func(_ int, s *goquery.Selection) {
 		href, _ := s.Attr("href")
+		if strings.TrimSpace(href) == "" {
+			return
+		}
+
 		hrefURL, err := url.Parse(href)
 		if err != nil {
 			fmt.Printf("error: failed to parse url <%v>\n", href)
 			return
 		}
 
-		if hrefURL.Host == baseURL.Host {
-			urls = append(urls, href)
-		} else if hrefURL.Host == "" && hrefURL.Path != "" {
-			urls = append(urls, baseURLString+"/"+strings.TrimPrefix(hrefURL.Path, "/"))
-		}
+		absolute := baseURL.ResolveReference(hrefURL)
+		urls = append(urls, absolute.String())
 	})
 
 	return urls, nil
@@ -41,22 +41,22 @@ func getImagesFromHTML(htmlBody string, baseURL *url.URL) ([]string, error) {
 		return nil, err
 	}
 
-	baseURLString := strings.TrimSuffix(baseURL.String(), "/")
 	srcs := doc.Find("img[src]")
 	images := make([]string, 0, srcs.Length())
 	srcs.Each(func(_ int, s *goquery.Selection) {
 		src, _ := s.Attr("src")
-		srcURL, err := url.Parse(src)
-		if err != nil {
-			fmt.Printf("error: failed to parse url <%v>\n", src)
+		if strings.TrimSpace(src) == "" {
 			return
 		}
 
-		if srcURL.Host == "" && srcURL.Path != "" {
-			images = append(images, baseURLString+"/"+strings.TrimPrefix(srcURL.Path, "/"))
-		} else {
-			images = append(images, src)
+		srcURL, err := url.Parse(src)
+		if err != nil {
+			fmt.Printf("error: failed to parse src <%v>\n", src)
+			return
 		}
+
+		absolute := baseURL.ResolveReference(srcURL)
+		images = append(images, absolute.String())
 	})
 
 	return images, nil

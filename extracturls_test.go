@@ -11,13 +11,13 @@ func TestGetURLsFromHTMLAbsolute(t *testing.T) {
 	inputBody := `
 <html>
 	<body>
-		<a href="https://blog.boot.dev"><span>Boot.dev</span></a>
+		<a href="https://blog.boot.dev/"><span>Boot.dev</span></a>
 		<a href="https://wikipedia.org"><span>Boot.dev</span></a>
 		<a href="https://google.com"><span>Boot.dev</span></a>
 		<a href="https://youtube.com"><span>Boot.dev</span></a>
 		<a href="https://blog.boot.dev/haha"><span>Boot.dev</span></a>
 		<a href="https://blog.boot.dev/xoxo"><span>Boot.dev</span></a>
-		<a href="https://blog.boot.dev/heehee"><span>Boot.dev</span></a>
+		<a href="https://blog.boot.dev/heehee/"><span>Boot.dev</span></a>
 	</body>
 </html>
 `
@@ -34,10 +34,13 @@ func TestGetURLsFromHTMLAbsolute(t *testing.T) {
 	}
 
 	expected := []string{
-		"https://blog.boot.dev",
+		"https://blog.boot.dev/",
+		"https://wikipedia.org",
+		"https://google.com",
+		"https://youtube.com",
 		"https://blog.boot.dev/haha",
 		"https://blog.boot.dev/xoxo",
-		"https://blog.boot.dev/heehee",
+		"https://blog.boot.dev/heehee/",
 	}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("expected %v, got %v", expected, actual)
@@ -73,6 +76,9 @@ func TestGetURLsFromHTMLRelative(t *testing.T) {
 
 	expected := []string{
 		"https://blog.boot.dev/some/path",
+		"https://wikipedia.org",
+		"https://google.com",
+		"https://youtube.com",
 		"https://blog.boot.dev/haha",
 		"https://blog.boot.dev/xoxo",
 		"https://blog.boot.dev/heehee/",
@@ -87,9 +93,7 @@ func TestGetURLsFromHTMLNone(t *testing.T) {
 	inputBody := `
 <html>
 	<body>
-		<a href="https://wikipedia.org"><span>Boot.dev</span></a>
-		<a href="https://google.com"><span>Boot.dev</span></a>
-		<a href="https://youtube.com"><span>Boot.dev</span></a>
+		<p>Paragraph</p>
 	</body>
 </html>
 `
@@ -140,6 +144,9 @@ func TestGetURLsFromHTMLMixed(t *testing.T) {
 
 	expected := []string{
 		"https://blog.boot.dev/some/path",
+		"https://wikipedia.org",
+		"https://google.com",
+		"https://youtube.com",
 		"https://blog.boot.dev/haha",
 		"https://blog.boot.dev/xoxo",
 		"https://blog.boot.dev/heehee/",
