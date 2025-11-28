@@ -34,3 +34,30 @@ func getURLsFromHTML(htmlBody string, baseURL *url.URL) ([]string, error) {
 
 	return urls, nil
 }
+
+func getImagesFromHTML(htmlBody string, baseURL *url.URL) ([]string, error) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlBody))
+	if err != nil {
+		return nil, err
+	}
+
+	baseURLString := strings.TrimSuffix(baseURL.String(), "/")
+	srcs := doc.Find("a[href]")
+	images := make([]string, 0, srcs.Length())
+	srcs.Each(func(_ int, s *goquery.Selection) {
+		src, _ := s.Attr("src")
+		srcURL, err := url.Parse(src)
+		if err != nil {
+			fmt.Printf("error: failed to parse url <%v>\n", src)
+			return
+		}
+
+		if srcURL.Host == "" && srcURL.Path != "" {
+			images = append(images, baseURLString+"/"+strings.TrimPrefix(srcURL.Path, "/"))
+		} else {
+			images = append(images, src)
+		}
+	})
+
+	return images, nil
+}
