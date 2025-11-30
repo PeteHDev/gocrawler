@@ -132,7 +132,7 @@ func TestExtractPageDataMissingFields(t *testing.T) {
 			expected: PageData{
 				URL:            "https://blog.boot.dev",
 				H1:             "Test Title",
-				FirstParagraph: "This is the first paragraph.",
+				FirstParagraph: "This is the second paragraph but it is in main.",
 				OutgoingLinks: []string{
 					"https://blog.boot.dev/link1",
 					"https://blog.boot.dev/link2",
@@ -190,7 +190,7 @@ func TestExtractPageDataMissingFields(t *testing.T) {
 			expected: PageData{
 				URL:            "https://blog.boot.dev",
 				H1:             "Test Title",
-				FirstParagraph: "This is the first paragraph.",
+				FirstParagraph: "This is the second paragraph but it is in main.",
 				OutgoingLinks:  []string{},
 				ImageURLs: []string{
 					"https://blog.boot.dev/image1.jpg",
@@ -217,7 +217,7 @@ func TestExtractPageDataMissingFields(t *testing.T) {
 			expected: PageData{
 				URL:            "https://blog.boot.dev",
 				H1:             "Test Title",
-				FirstParagraph: "This is the first paragraph.",
+				FirstParagraph: "This is the second paragraph but it is in main.",
 				OutgoingLinks: []string{
 					"https://blog.boot.dev/link1",
 					"https://blog.boot.dev/link2",
