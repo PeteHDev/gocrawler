@@ -3,14 +3,23 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"sync"
 )
 
-func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
-	baseURL, err := url.Parse(rawBaseURL)
-	if err != nil {
-		fmt.Printf("error: could not parse URL <%s>: %v\n", rawBaseURL, err)
-		return
-	}
+type config struct {
+	pages              map[string]PageData
+	baseURL            *url.URL
+	mu                 *sync.Mutex
+	concurrencyControl chan struct{}
+	wg                 *sync.WaitGroup
+}
+
+func (cfg *config) crawlPage(rawCurrentURL string) {
+	cfg.concurrencyControl <- struct{}{}
+	defer func() {
+		<-cfg.concurrencyControl
+		cfg.wg.Done()
+	}()
 
 	currentURL, err := url.Parse(rawCurrentURL)
 	if err != nil {
@@ -18,7 +27,9 @@ func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
 		return
 	}
 
-	if baseURL.Host != currentURL.Host {
+	if cfg.baseURL == nil {
+		cfg.baseURL = currentURL
+	} else if cfg.baseURL.Hostname() != currentURL.Hostname() {
 		return
 	}
 
@@ -28,11 +39,8 @@ func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
 		return
 	}
 
-	_, ok := pages[normCurrentURL]
-	if !ok {
-		pages[normCurrentURL] = 1
-	} else {
-		pages[normCurrentURL]++
+	firstVisit := cfg.addPageVisit(normCurrentURL)
+	if !firstVisit {
 		return
 	}
 
@@ -43,13 +51,44 @@ func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
 		return
 	}
 
-	urls, err := getURLsFromHTML(html, currentURL)
-	if err != nil {
-		fmt.Printf("error: failed to retrieve URLs from <%s>: %v\n", rawCurrentURL, err)
-		return
+	data := extractPageData(html, rawCurrentURL)
+	cfg.setPageData(normCurrentURL, data)
+
+	for _, link := range data.OutgoingLinks {
+		cfg.wg.Add(1)
+		go cfg.crawlPage(link)
+	}
+}
+
+func (cfg *config) addPageVisit(normalizedURL string) (isFirst bool) {
+	cfg.mu.Lock()
+	defer cfg.mu.Unlock()
+
+	if _, visited := cfg.pages[normalizedURL]; visited {
+		return false
 	}
 
-	for _, link := range urls {
-		crawlPage(rawBaseURL, link, pages)
+	cfg.pages[normalizedURL] = PageData{URL: normalizedURL}
+	return true
+}
+
+func (cfg *config) setPageData(normalizedURL string, data PageData) {
+	cfg.mu.Lock()
+	defer cfg.mu.Unlock()
+	cfg.pages[normalizedURL] = data
+}
+
+func configure(rawBaseURL string, maxConcurrency int) (*config, error) {
+	baseURL, err := url.Parse(rawBaseURL)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't parse base URL: %v", err)
 	}
+
+	return &config{
+		pages:              make(map[string]PageData),
+		baseURL:            baseURL,
+		mu:                 &sync.Mutex{},
+		concurrencyControl: make(chan struct{}, maxConcurrency),
+		wg:                 &sync.WaitGroup{},
+	}, nil
 }

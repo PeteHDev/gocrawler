@@ -14,10 +14,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	pages := make(map[string]int)
-	fmt.Printf("starting crawl of: %v\n", os.Args[1])
-	crawlPage(os.Args[1], os.Args[1], pages)
-	for link, count := range pages {
-		fmt.Printf("%s -> %d\n", link, count)
+	maxConcurrency := 10
+	cfg, err := configure(os.Args[1], maxConcurrency)
+	if err != nil {
+		fmt.Printf("error - configure: %v", err)
+		os.Exit(1)
+	}
+
+	cfg.wg.Add(1)
+	go cfg.crawlPage(os.Args[1])
+	cfg.wg.Wait()
+
+	for page, data := range cfg.pages {
+		fmt.Print("==============================\n==============================\n")
+		fmt.Printf("<%s>\n", page)
+		fmt.Printf("Title: %s\n", data.H1)
+		fmt.Printf("Excerpt: %s\n", data.FirstParagraph)
+		fmt.Printf("Outgoing links: %d\n", len(data.OutgoingLinks))
+		fmt.Printf("Image URLs: %d\n", len(data.ImageURLs))
 	}
 }
