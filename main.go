@@ -36,6 +36,8 @@ func main() {
 		fmt.Printf("Outgoing links: %d\n", len(data.OutgoingLinks))
 		fmt.Printf("Image URLs: %d\n", len(data.ImageURLs))
 	}
+
+	writeCSVReport(cfg.pages, "report.csv")
 }
 
 func getMaxConcurrency() int {
